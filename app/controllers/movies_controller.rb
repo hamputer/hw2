@@ -10,14 +10,15 @@ class MoviesController < ApplicationController
 		if !params[:sort]
     	@movies = Movie.all
 		else
-			method = params[:sort]
 			sort = params[:sort]
 			if sort == 'title'
-				ordering = {:order => :title}
+				sort_by = {:order => :title}
+				@title_header = "hilite"
 			else
-				ordering = {:order => :release_date}
+				sort_by = {:order => :release_date}
+				@release_date_header = "hilite"
 			end
-  		@movies = Movie.find(:all, ordering)
+  		@movies = Movie.find(:all, sort_by)
 		end
   end
 
