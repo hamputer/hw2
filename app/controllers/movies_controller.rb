@@ -7,19 +7,28 @@ class MoviesController < ApplicationController
   end
 
   def index
+		session_rating = false
+		session_sort = false
 		@all_ratings = Movie.ratings
-		@checked = {'G'=>"1", 'PG'=> "1", 'PG-13' => '1', 'R'=>'1'}
-		if !params[:ratings]
+		@checked = {'G'=>"1", 'PG'=> "1", 'PG-13' => '1', 'R'=>'1','NC-17'=>1}
+
+		if !params[:ratings] && !session[:ratings]
     	selection = Movie.all
 		else
-			@checked = params[:ratings]
-			condition = {:conditions => { :rating => params[:ratings].keys} }
+			if !params[:ratings] && session[:ratings]
+				session_rating = true
+			end
+			@checked = params[:ratings] || session[:ratings]
+			condition = {:conditions => { :rating => @checked.keys} }
 			selection = Movie.find(:all, condition)
 		end
-		if !params[:sort]
+		if !params[:sort] && !session[:sort]
     	@movies = selection
 		else
-			sort = params[:sort]
+			if !params[:sort] && session[:sort]
+				session_sort = true
+			end
+			sort = params[:sort] || session[:sort]
 			if sort == 'title'
 				sort_by = {:order => :title}
 				@title_header = "hilite"
@@ -28,6 +37,12 @@ class MoviesController < ApplicationController
 				@release_date_header = "hilite"
 			end
   		@movies = Movie.find(:all, condition, sort_by)
+		end
+		session[:ratings] = params[:ratings]
+		session[:sort] = params[:sort]
+		if session_sort || session_rating
+			flash.keep
+			redirect_to movies_path :sort=> sort, :ratings=> @checked
 		end
   end
 
