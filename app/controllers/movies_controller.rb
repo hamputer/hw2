@@ -7,8 +7,17 @@ class MoviesController < ApplicationController
   end
 
   def index
+		@all_ratings = Movie.ratings
+		@checked = {'G'=>"1", 'PG'=> "1", 'PG-13' => '1', 'R'=>'1'}
+		if !params[:ratings]
+    	selection = Movie.all
+		else
+			@checked = params[:ratings]
+			condition = {:conditions => { :rating => params[:ratings].keys} }
+			selection = Movie.find(:all, condition)
+		end
 		if !params[:sort]
-    	@movies = Movie.all
+    	@movies = selection
 		else
 			sort = params[:sort]
 			if sort == 'title'
@@ -18,7 +27,7 @@ class MoviesController < ApplicationController
 				sort_by = {:order => :release_date}
 				@release_date_header = "hilite"
 			end
-  		@movies = Movie.find(:all, sort_by)
+  		@movies = Movie.find(:all, condition, sort_by)
 		end
   end
 
